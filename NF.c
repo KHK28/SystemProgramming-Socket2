@@ -8,24 +8,24 @@
 #include <uapi/linux/netfilter.h>
 #include <uapi/linux/netfilter_ipv4.h>
 
-static unsigned int hook_function(void *priv, struct sk_buff *skb, const struct nf_hook_state *state)
+static unsigned int hook_pre(void *priv, struct sk_buff *skb, const struct nf_hook_state *state)
 {
 	struct iphdr *IP = ip_hdr(skb);
 	struct tcphdr *TCP = tcp_hdr(skb);
 }
 
-static struct nf_hook_ops ops;
+static struct nf_hook_ops ops_pre;
 
 static int __init NF_init(void)
 {	
-	ops.hook = hook_function;
-	ops.pf = PF_INET;
-	ops.hooknum = NF_INET_FORWARD;
-	ops.priority = NF_IP_PRI_FIRST;
+	ops_pre.hook = hook_pre;
+	ops_pre.pf = PF_INET;
+	ops_pre.hooknum = NF_INET_PRE_ROUTING;
+	ops_pre.priority = NF_IP_PRI_FIRST;
 	/* 
 	Add Proc
 	*/
-	nf_register_hook(&ops);
+	nf_register_hook(&ops_pre);
 	return 0;
 }
 
@@ -34,7 +34,7 @@ static void __exit NF_exit(void)
 	/* 
 	Remove Proc
 	*/
-	nf_unregister_hook(&ops);
+	nf_unregister_hook(&ops_pre);
 }
 
 module_init(NF_init);
