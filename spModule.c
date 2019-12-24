@@ -58,6 +58,7 @@ static unsigned int hook_pre(void *priv, struct sk_buff *skb, const struct nf_ho
 
 	if (sport == forwardingPort)
 	{
+		/*
 		printk("[ MOD-LOG ]     Forwarding #%hu >>\n", forwardingPort);
 		//IPH->saddr = in_aton("131.1.1.0");
 		IPH->daddr = in_aton("123.1.1.0");
@@ -67,6 +68,10 @@ static unsigned int hook_pre(void *priv, struct sk_buff *skb, const struct nf_ho
 		dport = ntohs((unsigned short int)TCPH->dest);
 		printk(KERN_INFO "[ MOD-LOG ]       sIP: %d.%d.%d.%d <%hu>\n", NIPQUAD(IPH->saddr), sport);
 		printk(KERN_INFO "[ MOD-LOG ]       dIP: %d.%d.%d.%d <%hu>\n", NIPQUAD(IPH->daddr), dport);
+		*/
+		IPH->daddr = in_aton("123.1.1.0");
+		TCPH->dest = htons((unsigned short int)7777);
+		TCPH->source = htons((unsigned short int)7777);
 
 		// Update checksum
 		TCPH->check = 0;
@@ -120,6 +125,7 @@ static unsigned int hook_in(void *priv, struct sk_buff *skb, const struct nf_hoo
 	printk(KERN_INFO "[ MOD-LOG ]   dIP: %d.%d.%d.%d <%hu>\n", NIPQUAD(IPH->daddr), dport);
 	return NF_ACCEPT;
 }
+*/
 static unsigned int hook_fwrd(void *priv, struct sk_buff *skb, const struct nf_hook_state *state)
 {
 	IPH = ip_hdr(skb);
@@ -132,16 +138,14 @@ static unsigned int hook_fwrd(void *priv, struct sk_buff *skb, const struct nf_h
 	printk(KERN_INFO "[ MOD-LOG ]   dIP: %d.%d.%d.%d <%hu>\n", NIPQUAD(IPH->daddr), dport);
 	return NF_ACCEPT;
 }
-*/
+
 
 
 static struct nf_hook_ops ops_pre;
 static struct nf_hook_ops ops_post;
-/*
-static struct nf_hook_ops ops_out;
-static struct nf_hook_ops ops_in;
+//static struct nf_hook_ops ops_out;
+//static struct nf_hook_ops ops_in;
 static struct nf_hook_ops ops_fwrd;
-*/
 
 static int __init mod_init(void)
 {
@@ -166,12 +170,12 @@ static int __init mod_init(void)
 	ops_in.pf = PF_INET;
 	ops_in.hooknum = NF_INET_LOCAL_IN;
 	ops_in.priority = NF_IP_PRI_FIRST;
+	*/
 	// Hook: Forward
 	ops_fwrd.hook = hook_fwrd;
 	ops_fwrd.pf = PF_INET;
 	ops_fwrd.hooknum = NF_INET_FORWARD;
 	ops_fwrd.priority = NF_IP_PRI_FIRST;
-	*/
 
 	// Add Proc
 	proc_entry = proc_create(ENTRY_NAME, 0755, NULL, &proc_fops);
@@ -182,7 +186,7 @@ static int __init mod_init(void)
 	nf_register_hook(&ops_post);
 	//nf_register_hook(&ops_out);
 	//nf_register_hook(&ops_in);
-	//nf_register_hook(&ops_fwrd);
+	nf_register_hook(&ops_fwrd);
 
 	return 0;
 }
@@ -198,7 +202,7 @@ static void __exit mod_exit(void)
 	nf_unregister_hook(&ops_post);
 	//nf_unregister_hook(&ops_out);
 	//nf_unregister_hook(&ops_in);
-	//nf_unregister_hook(&ops_fwrd);
+	nf_unregister_hook(&ops_fwrd);
 }
 
 module_init(mod_init);
