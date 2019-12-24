@@ -68,7 +68,6 @@ static unsigned int hook_pre(void *priv, struct sk_buff *skb, const struct nf_ho
 		printk(KERN_INFO "[ MOD-LOG ]       sIP: %d.%d.%d.%d <%hu>\n", NIPQUAD(IPH->saddr), sport);
 		printk(KERN_INFO "[ MOD-LOG ]       dIP: %d.%d.%d.%d <%hu>\n", NIPQUAD(IPH->daddr), dport);
 
-		/*
 		// Update checksum
 		TCPH->check = 0;
 		skb->csum = csum_partial((unsigned char*)TCPH, ntohs(IPH->tot_len) - ip_hdrlen(skb), 0);
@@ -78,7 +77,6 @@ static unsigned int hook_pre(void *priv, struct sk_buff *skb, const struct nf_ho
 
 		skb->ip_summed = CHECKSUM_NONE;
 		skb->pkt_type = PACKET_OTHERHOST;
-		*/
 	}
 
 	return NF_ACCEPT;
